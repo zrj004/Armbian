@@ -63,9 +63,9 @@ on:
         type: choice
         description: 'install headers'
         options:
-        - yes
-        - no
-        defaults: 'yes'
+        - true
+        - false
+        defaults: 'true'
 jobs:
 
   build:
