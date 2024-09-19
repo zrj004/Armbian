@@ -1,0 +1,115 @@
+name: "NanoPi-M4-build"
+on:
+  workflow_dispatch:
+    inputs:
+
+      armbian_target:
+        type: choice
+        description: 'Build'
+        required: false
+        options:
+        - kernel
+        - build
+        default: build
+
+      armbian_kernel_branch:
+        type: choice
+        description: 'Kernel branch'
+        options:
+        - legacy
+        - current
+        - edge
+        default: 'current'
+
+      armbian_release:
+        type: choice
+        description: 'Userspace'
+        options:
+        - jammy
+        - mantic
+        - bookworm
+        - trixie
+        - sid
+        default: 'bookworm'
+
+      armbian_ui:
+        type: choice
+        description: 'User interface (not all works)'
+        options:
+        - minimal
+        - server
+        - xfce
+        - gnome
+        - cinnamon
+        - i3-wm
+        - kde-plasma
+        default: 'minimal'
+
+      armbian_version:
+        description: 'Version'
+        required: false
+        default: ''
+
+      armbian_board:
+        type: choice
+        description: 'Board'
+        options:
+        - nanopim4
+        - nanopineo2
+        - xiaobao-nas
+        default: 'nanopim4'
+      
+      armbian_install_headers:
+        type: choice
+        description: 'install headers'
+        options:
+        - yes
+        - no
+        defaults: 'yes'
+jobs:
+
+  build:
+    name: "Build Armbian"
+    runs-on: ubuntu-latest
+    steps:
+    - name: 检查项目分支
+      uses: actions/checkout@main
+
+    - name: 清理磁盘空间
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true        
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        swap-storage: true
+      
+    - name: 查看机器配置
+      run: |
+        echo "警告⚠"
+        echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+        echo -e "CPU性能排序: 7763 > 8370C > 8272CL > 8171M > E5-2673\n"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo "CPU核心数量: $(nproc)"
+        echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
+        echo "--------------------------内存信息--------------------------"
+        echo "已安装内存详细信息:"
+        echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+    
+      - uses: zrj004/build@main
+        with:
+          armbian_token:              "${{secrets.GITHUB_TOKEN}}"
+          armbian_target:             "${{inputs.armbian_target}}"
+          armbian_release:            "${{inputs.armbian_release}}"
+          armbian_kernel_branch:      "${{inputs.armbian_kernel_branch}}"
+          armbian_ui:                 "${{inputs.armbian_ui}}"
+          armbian_board:              "${{inputs.armbian_board}}"
+          armbian_install_headers:    "${{inputs.armbian_install_headers}}"
+          armbian_release_tittle:     "Armbian SDK"
+          armbian_release_body:       "Virtual images for x86 and arm64"
+          armbian_pgp_key:            "${{secrets.GPG_KEY1}}"
+          armbian_pgp_password:       "${{secrets.GPG_PASSPHRASE1}}"
