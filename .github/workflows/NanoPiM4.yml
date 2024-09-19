@@ -100,7 +100,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
     
-      - uses: zrj004/build@main
+      - uses: zrj004/Armbian@main
         with:
           armbian_token:              "${{secrets.GITHUB_TOKEN}}"
           armbian_target:             "${{inputs.armbian_target}}"
