@@ -1,4 +1,4 @@
-name: "NanoPi-M4-build"
+name: "NanoPi-M4"
 on:
   workflow_dispatch:
     inputs:
